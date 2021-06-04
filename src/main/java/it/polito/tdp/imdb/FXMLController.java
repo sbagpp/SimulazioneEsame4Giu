@@ -59,6 +59,7 @@ public class FXMLController {
     		return;
     	}
     	this.model.creaGrafo(genere);
+    	this.txtResult.setText(this.model.infoGrafo()+"\n");
     }
 
     @FXML
