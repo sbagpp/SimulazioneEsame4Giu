@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import it.polito.tdp.imdb.model.Actor;
 import it.polito.tdp.imdb.model.Director;
 import it.polito.tdp.imdb.model.Movie;
@@ -104,6 +106,53 @@ public class ImdbDAO {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public void loadIdMap(Map<Integer, Actor> idMap) {
+		String sql = "SELECT * FROM actors";
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				Actor actor = new Actor(res.getInt("id"), res.getString("first_name"), res.getString("last_name"),
+						res.getString("gender"));
+				idMap.put(actor.getId(),actor);
+			}
+			conn.close();
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public List<Actor> getVertex(Map<Integer, Actor> idMap, String genere) {
+		String sql = "SELECT Distinct(a.`id` ) as id "
+				+ "FROM `actors` as a, `roles` as r, `movies` as m, `movies_genres` as g "
+				+ "WHERE g.`genre`= 'Horror' and r.`actor_id`=a.`id` and r.`movie_id`=m.`id` and g.`movie_id`=m.`id` ";
+		List<Actor> result = new ArrayList<>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1,  genere);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				Actor a = idMap.get(res.getInt("id"));
+				if(a != null) {
+					result.add(a);
+				}
+			}
+			conn.close();
+			return result;
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	
